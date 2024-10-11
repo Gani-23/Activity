@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dvwa-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dvwa-web
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: dvwa-web
+        tier: frontend
+    spec:
+      containers:
+        - name: dvwa
+          image: cytopia/dvwa:latest
+          ports:
+            - containerPort: 80
+          env:
+            - name: RECAPTCHA_PRIV_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: dvwa-config
+                  key: RECAPTCHA_PRIV_KEY
+            - name: RECAPTCHA_PUB_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: dvwa-config
+                  key: RECAPTCHA_PUB_KEY
+            - name: SECURITY_LEVEL
+              valueFrom:
+                configMapKeyRef:
+                  name: dvwa-config
+                  key: SECURITY_LEVEL
+            - name: PHPIDS_ENABLED
+              valueFrom:
+                configMapKeyRef:
+                  name: dvwa-config
+                  key: PHPIDS_ENABLED
+            - name: PHPIDS_VERBOSE
+              valueFrom:
+                configMapKeyRef:
+                  name: dvwa-config
+                  key: PHPIDS_VERBOSE
+            - name: PHP_DISPLAY_ERRORS
+              valueFrom:
+                configMapKeyRef:
+                  name: dvwa-config
+                  key: PHP_DISPLAY_ERRORS
+            - name: MYSQL_HOSTNAME
+              value: dvwa-mysql-service
+            - name: MYSQL_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: dvwa-secrets
+                  key: DVWA_DATABASE
+            - name: MYSQL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: dvwa-secrets
+                  key: DVWA_USERNAME
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: dvwa-secrets
+                  key: DVWA_PASSWORD
+          resources:  # Make sure this section is correctly formatted
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"

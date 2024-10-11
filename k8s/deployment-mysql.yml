@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dvwa-mysql
+  namespace: default
+  labels:
+    app: dvwa-mysql
+    tier: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dvwa-mysql
+      tier: backend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: dvwa-mysql
+        tier: backend
+    spec:
+      containers:
+      - name: mysql
+        image: mariadb:10.1
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3306
+          protocol: TCP
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: dvwa-secrets
+              key: ROOT_PASSWORD
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: dvwa-secrets
+              key: DVWA_USERNAME
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: dvwa-secrets
+              key: DVWA_PASSWORD
+        - name: MYSQL_DATABASE
+          valueFrom:
+            secretKeyRef:
+              name: dvwa-secrets
+              key: DVWA_DATABASE
+        volumeMounts:
+        - name: dvwa-mysql-vol
+          mountPath: /var/lib/mysql
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+      volumes:
+      - name: dvwa-mysql-vol
+        persistentVolumeClaim:
+          claimName: mysql-pvc

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dvwa-web-service
+  labels:
+    app: dvwa-web
+spec:
+  selector:
+    app: dvwa-web
+    tier: frontend
+  type: LoadBalancer  
+  ports:
+    - protocol: TCP
+      port: 80           # Exposing service on port 80 for HTTP
+      targetPort: 80      # Forwarding traffic to container's port 80
